@@ -18,7 +18,7 @@ PROJ-76 : Jira와 GitHub 상태 연동
 
 *
 
-```
+``` text
 
 [예시]
 * Jira와 GitHub 상태 연동을 체계를 구축하였습니다.
@@ -40,7 +40,7 @@ PROJ-76 : Jira와 GitHub 상태 연동
 - **검토(Review) 후 병합(Merge)되는 경우**, \
 Commit Message에 `#done` Tag를 포함하여 **Jira**에서 작업 상태를 `완료(DONE)`로 변경합니다.
 
-```
+``` text
 
 [양식]
 
@@ -69,7 +69,7 @@ chore: Jira와 GitHub 연동
 
 #done
 
-```
+``` text
 
 - **수정 요청(Request Changes)을 받거나, 병합 없이 닫히는(Close) 경우**, \
 **Jira**에서 해당되는 작업의 상태를 다시 `진행 중(IN PROGRESS)` 상태로 변경합니다.
