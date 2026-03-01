@@ -1,6 +1,6 @@
 > 제목 (Title)
 
-```
+``` text
 
 [양식]
 <Jira Ticket ID> : <Summary>
