@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [opened, reopened, closed]
 
+permissions:
+  contents: read
+  actions: write
+
 jobs:
   extract:
     runs-on: ubuntu-latest
