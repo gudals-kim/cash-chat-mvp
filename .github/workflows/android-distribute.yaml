@@ -49,6 +49,9 @@ jobs:
       - name: Write Firebase Service Account
         run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > service-account.json
 
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
       - name: Run Fastlane distribute
         env:
           KEYSTORE_PATH: ${{ github.workspace }}/apps/frontend/cashchat-release.keystore
