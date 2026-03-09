@@ -12,8 +12,7 @@ platform :android do
       app: ENV.fetch("FIREBASE_APP_ID"),
       groups: "testers",
       service_credentials_file: "service-account.json",
-      release_notes: ENV.fetch("RELEASE_NOTES", "New build available"),
-      notify_testers: true
+      release_notes: ENV.fetch("RELEASE_NOTES", "New build available")
     )
   end
 end
