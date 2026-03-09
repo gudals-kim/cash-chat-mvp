@@ -46,6 +46,29 @@ final class AppState: ObservableObject {
     }
 }
 
+final class KeyboardObserver: ObservableObject {
+    @Published var isVisible = false
+    private var observers: [NSObjectProtocol] = []
+
+    init() {
+        let center = NotificationCenter.default
+        observers.append(
+            center.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { [weak self] _ in
+                self?.isVisible = true
+            }
+        )
+        observers.append(
+            center.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { [weak self] _ in
+                self?.isVisible = false
+            }
+        )
+    }
+
+    deinit {
+        observers.forEach { NotificationCenter.default.removeObserver($0) }
+    }
+}
+
 struct OnboardingView: View {
     let onStart: () -> Void
     
@@ -125,6 +148,7 @@ struct OnboardingView: View {
     struct MainTabContainer: View {
         @EnvironmentObject private var appState: AppState
         @State private var selected: MainTab = .chat
+        @StateObject private var keyboard = KeyboardObserver()
         
         var body: some View {
             TabView(selection: $selected) {
@@ -145,6 +169,7 @@ struct OnboardingView: View {
                     .tag(MainTab.mypage)
             }
             .tint(.orange)
+            .toolbar(keyboard.isVisible ? .hidden : .visible, for: .tabBar)
         }
     }
     
@@ -225,6 +250,8 @@ struct OnboardingView: View {
         @State private var showRewardModal = false
         @State private var rewardIndex = 0
         @State private var replyTask: Task<Void, Never>?
+        @StateObject private var keyboard = KeyboardObserver()
+        @FocusState private var isInputFocused: Bool
         
         private let suggestions = ["오늘 점심 추천해줘", "여행 계획 짜줘", "영어 공부 방법", "다이어트 팁"]
         private let foodAd = AdInfo(brand: "배달의민족", tagline: "지금 주문하면 3,000원 즉시 할인!", cta: "지금 주문하기", emoji: "🍔", bg: Color(red: 1.0, green: 0.96, blue: 0.91), accent: .orange, category: "음식·배달")
@@ -357,6 +384,9 @@ struct OnboardingView: View {
                         HStack(spacing: 8) {
                             TextField("메시지를 입력하세요...", text: $input)
                                 .textFieldStyle(.roundedBorder)
+                                .foregroundStyle(Color(red: 0.12, green: 0.14, blue: 0.18))
+                                .tint(Color(red: 0.36, green: 0.42, blue: 0.98))
+                                .focused($isInputFocused)
                             Button(action: { submit() }) {
                                 Image(systemName: sfSymbol("paperplane.fill", fallback: "arrow.up.circle.fill"))
                             }
@@ -364,7 +394,7 @@ struct OnboardingView: View {
                         }
                         .padding(.horizontal, 14)
                         .padding(.top, 10)
-                        .padding(.bottom, 10)
+                        .padding(.bottom, keyboard.isVisible ? 14 : 10)
                         .background(.white)
                     }
                     
@@ -392,6 +422,9 @@ struct OnboardingView: View {
                                 HStack(spacing: 8) {
                                     TextField("질문을 입력해보세요...", text: $input)
                                         .textFieldStyle(.roundedBorder)
+                                        .foregroundStyle(Color(red: 0.12, green: 0.14, blue: 0.18))
+                                        .tint(Color(red: 0.36, green: 0.42, blue: 0.98))
+                                        .focused($isInputFocused)
                                     Button(action: { submit() }) {
                                         Image(systemName: sfSymbol("paperplane.fill", fallback: "arrow.up.circle.fill"))
                                     }
@@ -523,6 +556,11 @@ struct OnboardingView: View {
                 .opacity(animateIn ? 1 : 0)
                 .offset(y: animateIn ? 0 : 14)
                 .animation(.easeOut(duration: 0.34), value: animateIn)
+                .simultaneousGesture(
+                    TapGesture().onEnded {
+                        isInputFocused = false
+                    }
+                )
                 .onAppear {
                     animateIn = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
@@ -541,6 +579,7 @@ struct OnboardingView: View {
         private func submit(override: String? = nil) {
             let text = (override ?? input).trimmingCharacters(in: .whitespacesAndNewlines)
             guard !text.isEmpty, !isLoading else { return }
+            isInputFocused = false
             let sessionId = selectedSessionId
             chatIdle = false
             input = ""
