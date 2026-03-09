@@ -89,8 +89,9 @@ resource "oci_mysql_mysql_db_system" "this" {
 }
 
 resource "oci_mysql_heat_wave_cluster" "this" {
-  db_system_id          = oci_mysql_mysql_db_system.this.id
-  cluster_size          = 1
-  shape_name            = var.heatwave_shape_name
-  is_lakehouse_enabled  = var.enable_lakehouse
+  count                = var.enable_heatwave ? 1 : 0
+  db_system_id         = oci_mysql_mysql_db_system.this.id
+  cluster_size         = 1
+  shape_name           = var.heatwave_shape_name
+  is_lakehouse_enabled = var.enable_lakehouse
 }

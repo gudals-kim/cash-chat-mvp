@@ -60,7 +60,7 @@ variable "db_system_description" {
 variable "db_system_shape_name" {
   description = "MySQL DB System shape name."
   type        = string
-  default     = "MySQL.VM.Standard.E3.1.8GB"
+  default     = "MySQL.Free"
 }
 
 variable "hostname_label" {
@@ -87,10 +87,16 @@ variable "enable_lakehouse" {
   default     = false
 }
 
+variable "enable_heatwave" {
+  description = "Create a HeatWave cluster. Keep false for MySQL-only free-tier usage."
+  type        = bool
+  default     = false
+}
+
 variable "heatwave_shape_name" {
   description = "HeatWave cluster shape name."
   type        = string
-  default     = "HeatWave.32GB"
+  default     = "HeatWave.Free"
 }
 
 variable "subnet_cidr" {

@@ -6,12 +6,14 @@ Resources created:
 - Network Security Group for MySQL access
 - Private subnet in the existing VCN
 - MySQL DB System
-- HeatWave cluster
+- HeatWave cluster (optional)
 
 Notes:
 - This stack reuses an existing VCN instead of creating a new one.
 - The DB System is created in a private subnet.
 - Inbound MySQL access is limited by `mysql_ingress_cidr`.
+- Free-tier friendly defaults are set to `MySQL.Free` and `HeatWave.Free`.
+- HeatWave cluster creation is optional and controlled by `enable_heatwave`.
 - The exact DB System and HeatWave shapes are configurable through:
   `db_system_shape_name` and `heatwave_shape_name`
 - Shape availability depends on region, tenancy, and service limits.

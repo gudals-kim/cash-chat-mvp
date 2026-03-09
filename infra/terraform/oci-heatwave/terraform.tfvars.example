@@ -11,14 +11,15 @@ availability_domain_index = 0
 
 db_system_name        = "mysql-db"
 db_system_description = "MySQL HeatWave DB System"
-db_system_shape_name  = "MySQL.VM.Standard.E3.1.8GB"
+db_system_shape_name  = "MySQL.Free"
 hostname_label        = "mysqldb"
 
 admin_username = "admin"
 admin_password = "ReplaceThisWithAStrongPassword1!"
 
 enable_lakehouse = false
-heatwave_shape_name = "HeatWave.32GB"
+enable_heatwave  = false
+heatwave_shape_name = "HeatWave.Free"
 
 # ARM 스택 기본 VCN이 10.0.0.0/16 이므로 겹치지 않는 private subnet을 잡습니다.
 subnet_cidr        = "10.0.1.0/24"

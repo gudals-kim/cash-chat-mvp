@@ -15,6 +15,9 @@ hostname_label = "appserver"
 # ARM instance sizing example
 ocpus         = 4
 memory_in_gbs = 24
+boot_volume_size_in_gbs      = 50
+image_operating_system         = "Canonical Ubuntu"
+image_operating_system_version = "22.04"
 
 ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... replace_me"
 

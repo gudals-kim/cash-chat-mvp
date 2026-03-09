@@ -15,10 +15,10 @@ output "db_system_shape" {
 
 output "heatwave_cluster_shape" {
   description = "Provisioned HeatWave cluster shape."
-  value       = oci_mysql_heat_wave_cluster.this.shape_name
+  value       = try(oci_mysql_heat_wave_cluster.this[0].shape_name, null)
 }
 
 output "heatwave_cluster_size" {
   description = "HeatWave node count."
-  value       = oci_mysql_heat_wave_cluster.this.cluster_size
+  value       = try(oci_mysql_heat_wave_cluster.this[0].cluster_size, null)
 }

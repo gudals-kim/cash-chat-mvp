@@ -70,16 +70,22 @@ variable "memory_in_gbs" {
   default     = 24
 }
 
+variable "boot_volume_size_in_gbs" {
+  description = "Boot volume size in GB."
+  type        = number
+  default     = 50
+}
+
 variable "image_operating_system" {
   description = "Operating system to use for the image lookup."
   type        = string
-  default     = "Oracle Linux"
+  default     = "Canonical Ubuntu"
 }
 
 variable "image_operating_system_version" {
   description = "Operating system version for the image lookup."
   type        = string
-  default     = "9"
+  default     = "22.04"
 }
 
 variable "ssh_public_key" {
