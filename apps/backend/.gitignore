@@ -38,3 +38,9 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+### Environment ###
+.env
+
+### Claude ###
+.claude/worktrees
