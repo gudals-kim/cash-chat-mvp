@@ -1,6 +1,9 @@
 package com.wnl.cashchat.api.domain.auth.persistence.entity
 
+import com.wnl.cashchat.api.domain.user.persistence.entity.User
 import jakarta.persistence.*
+import org.hibernate.annotations.OnDelete
+import org.hibernate.annotations.OnDeleteAction
 import java.time.LocalDateTime
 
 @Entity
@@ -13,8 +16,14 @@ class RefreshToken(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 
-    @Column(name = "user_id", nullable = false)
-    val userId: Long,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "user_id",
+        nullable = false,
+        foreignKey = ForeignKey(name = "fk_refresh_token_user")
+    )
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    val user: User,
 
     @Column(nullable = false, unique = true)
     val token: String,

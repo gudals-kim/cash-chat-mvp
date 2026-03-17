@@ -160,7 +160,7 @@ class AuthService(
     private fun buildAuthResponse(user: User): AuthResponse {
 
         val accessToken = jwtTokenHandler.createAccessToken(user.id, user.role)
-        val refreshToken = generateRefreshToken(user.id)
+        val refreshToken = generateRefreshToken(user)
 
         return AuthResponse(
             accessToken = accessToken,
@@ -173,13 +173,13 @@ class AuthService(
 
     // -- Generate Refresh Token --
 
-    private fun generateRefreshToken(userId: Long): String {
+    private fun generateRefreshToken(user: User): String {
 
         val token = UUID.randomUUID().toString()
 
         refreshTokenRepository.save(
             RefreshToken(
-                userId = userId,
+                user = user,
                 token = token,
                 expiresAt = LocalDateTime.now().plusDays(14)
             )
@@ -201,9 +201,7 @@ class AuthService(
             throw IllegalArgumentException("Refresh token expired")
         }
 
-        val user = userRepository.findById(storedToken.userId).orElseThrow {
-            IllegalArgumentException("User not found")
-        }
+        val user = storedToken.user
 
         refreshTokenRepository.delete(storedToken)
 

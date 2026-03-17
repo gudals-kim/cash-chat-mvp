@@ -7,6 +7,7 @@ import com.nimbusds.jose.crypto.MACVerifier
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import com.wnl.cashchat.api.domain.user.persistence.entity.Role
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.*
 
@@ -15,6 +16,7 @@ class JwtTokenHandler(
     private val jwtProperties: JwtProperties
 ) {
 
+    private val log = LoggerFactory.getLogger(JwtTokenHandler::class.java)
     private val signer = MACSigner(jwtProperties.secretKey.toByteArray(Charsets.UTF_8))
     private val verifier = MACVerifier(jwtProperties.secretKey.toByteArray(Charsets.UTF_8))
 
@@ -43,6 +45,7 @@ class JwtTokenHandler(
             val signedJWT = SignedJWT.parse(token)
             return signedJWT.verify(verifier) && signedJWT.jwtClaimsSet.expirationTime.after(Date())
         } catch (e: Exception) {
+            log.debug("Token validation failed", e)
             return false
         }
     }
