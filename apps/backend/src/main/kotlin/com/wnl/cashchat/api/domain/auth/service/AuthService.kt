@@ -11,8 +11,10 @@ import com.wnl.cashchat.api.domain.auth.web.response.AuthResponse
 import com.wnl.cashchat.api.domain.user.persistence.entity.Role
 import com.wnl.cashchat.api.domain.user.persistence.entity.User
 import com.wnl.cashchat.api.domain.user.persistence.repository.UserRepository
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.RestClient
 import java.time.LocalDateTime
 import java.util.*
@@ -36,13 +38,17 @@ class AuthService(
         val user = userRepository.findByDeviceToken(deviceToken)
             ?: userRepository.save(User(name = "Guest", deviceToken = deviceToken))
 
+        if (user.provider != AuthProviderType.NONE) {
+            throw IllegalStateException("이미 OAuth로 가입된 사용자입니다. 소셜 로그인을 이용해주세요.")
+        }
+
         val accessToken = jwtTokenHandler.createAccessToken(user.id, user.role)
 
         return AuthResponse(
             accessToken = accessToken,
             refreshToken = null,
             userId = user.id,
-            role = user.role.name
+            role = user.role
         )
 
     }
@@ -81,17 +87,18 @@ class AuthService(
         val registration = oAuthProperties.getRegistration(registrationName)
         val provider = oAuthProperties.getProvider(registration.provider)
 
+        val formData = LinkedMultiValueMap<String, String>().apply {
+            add("code", code)
+            add("client_id", registration.clientId)
+            add("client_secret", registration.clientSecret)
+            add("redirect_uri", registration.redirectUri)
+            add("grant_type", "authorization_code")
+        }
+
         return restClient.post()
             .uri(provider.tokenUri)
-            .body(
-                mapOf(
-                    "code" to code,
-                    "client_id" to registration.clientId,
-                    "client_secret" to registration.clientSecret,
-                    "redirect_uri" to registration.redirectUri,
-                    "grant_type" to "authorization_code"
-                )
-            )
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .body(formData)
             .retrieve()
             .body(Map::class.java) as Map<String, Any>
 
@@ -132,6 +139,7 @@ class AuthService(
                 provider = providerType
                 providerId = userInfo.providerId
                 role = Role.MEMBER
+                this.deviceToken = null     // credential 분리: 승격 후 guest 로그인 경로 차단
             })
         }
 
@@ -158,7 +166,7 @@ class AuthService(
             accessToken = accessToken,
             refreshToken = refreshToken,
             userId = user.id,
-            role = user.role.name
+            role = user.role
         )
 
     }
@@ -185,7 +193,7 @@ class AuthService(
     @Transactional
     fun reissueToken(refreshToken: String): AuthResponse {
 
-        val storedToken = refreshTokenRepository.findByToken(refreshToken)
+        val storedToken = refreshTokenRepository.findByTokenForUpdate(refreshToken)
             ?: throw IllegalArgumentException("Invalid refresh token")
 
         if (storedToken.expiresAt.isBefore(LocalDateTime.now())) {

@@ -15,8 +15,8 @@ class JwtTokenHandler(
     private val jwtProperties: JwtProperties
 ) {
 
-    private val signer = MACSigner(jwtProperties.secretKey.toByteArray())
-    private val verifier = MACVerifier(jwtProperties.secretKey.toByteArray())
+    private val signer = MACSigner(jwtProperties.secretKey.toByteArray(Charsets.UTF_8))
+    private val verifier = MACVerifier(jwtProperties.secretKey.toByteArray(Charsets.UTF_8))
 
     fun createAccessToken(userId: Long, role: Role): String {
 

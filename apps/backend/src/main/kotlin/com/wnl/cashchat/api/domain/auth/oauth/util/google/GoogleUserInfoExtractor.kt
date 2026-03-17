@@ -12,10 +12,10 @@ class GoogleUserInfoExtractor : OAuthUserInfoExtractor {
 
     override fun extract(response: Map<String, Any>) = OAuthUserInfo(
         providerId = response["sub"] as? String
-            ?: throw IllegalStateException("Google user info does not contain 'sub'"),
+            ?: throw IllegalArgumentException("Google user info does not contain 'sub'"),
         email = response["email"] as? String,
         name = response["name"] as? String
-            ?: throw IllegalStateException("Google user info does not contain 'name'"),
+            ?: throw IllegalArgumentException("Google user info does not contain 'name'"),
         profileImageUrl = response["picture"] as? String
     )
 }

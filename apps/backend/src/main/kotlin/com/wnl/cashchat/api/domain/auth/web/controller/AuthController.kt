@@ -4,6 +4,7 @@ import com.wnl.cashchat.api.domain.auth.persistence.entity.AuthProviderType
 import com.wnl.cashchat.api.domain.auth.service.AuthService
 import com.wnl.cashchat.api.domain.auth.web.request.TokenRefreshRequest
 import com.wnl.cashchat.api.domain.auth.web.response.AuthResponse
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -29,7 +30,7 @@ class AuthController(
     }
 
     @PostMapping("/refresh")
-    fun reissueToken(@RequestBody request: TokenRefreshRequest): ResponseEntity<AuthResponse> {
+    fun reissueToken(@Valid @RequestBody request: TokenRefreshRequest): ResponseEntity<AuthResponse> {
         val response = authService.reissueToken(request.refreshToken)
         return ResponseEntity.ok(response)
     }
