@@ -1,0 +1,81 @@
+name: Android Build Check
+
+on:
+  pull_request:
+    branches: [ dev ]
+    paths:
+      - 'apps/frontend/**'
+
+jobs:
+  build-check:
+    if: github.repository == 'cash-chat-mvp/cash-chat-mvp'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('apps/frontend/**/*.gradle.kts', 'apps/frontend/gradle/libs.versions.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Write google-services.json
+        run: echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > app/google-services.json
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Build Debug APK (검증용)
+        run: ./gradlew :app:assembleDebug
+
+      # PR에 빌드 결과 댓글
+      - name: 빌드 성공 Discord 알림
+        if: success()
+        run: |
+          curl -X POST "${{ secrets.DISCORD_WEBHOOK }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "embeds": [{
+                "color": 5763719,
+                "title": "✅  PR 빌드 검증 통과",
+                "description": "**[${{ github.event.pull_request.title }}](${{ github.event.pull_request.html_url }})**",
+                "fields": [
+                  {"name": "브랜치", "value": "`${{ github.head_ref }}` → `dev`", "inline": true},
+                  {"name": "작성자", "value": "`${{ github.actor }}`", "inline": true}
+                ],
+                "footer": {"text": "Cash Chat · Android Build Check"}
+              }]
+            }'
+
+      - name: 빌드 실패 Discord 알림
+        if: failure()
+        run: |
+          curl -X POST "${{ secrets.DISCORD_WEBHOOK }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "embeds": [{
+                "color": 15548997,
+                "title": "🚨  PR 빌드 검증 실패",
+                "description": "**[${{ github.event.pull_request.title }}](${{ github.event.pull_request.html_url }})**",
+                "fields": [
+                  {"name": "브랜치", "value": "`${{ github.head_ref }}` → `dev`", "inline": true},
+                  {"name": "작성자", "value": "`${{ github.actor }}`", "inline": true},
+                  {"name": "로그 확인", "value": "[Actions 로그 바로가기](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})", "inline": false}
+                ],
+                "footer": {"text": "Cash Chat · Android Build Check"}
+              }]
+            }'
